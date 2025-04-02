@@ -8,7 +8,7 @@
 
 ## Bug Fixed and Other Changes
 
-# Version 1.16.0
+# Version 1.17.0
 
 ## Major Features and Improvements
 
