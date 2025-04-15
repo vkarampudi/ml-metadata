@@ -90,7 +90,7 @@ http_archive(
     sha256 = "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/6.5.0/bazel-skylib-6.5.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-6.5.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/6.5.0/bazel-skylib-6.5.0.tar.gz",
     ],
 )
 
