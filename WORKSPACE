@@ -253,7 +253,7 @@ http_archive(
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
     #patches = ["//ml_metadata/third_party:zetasql.patch"],
-    sha256 = '9cfa1569863282ccbac150644f36ee4f12f9649caa7556ce340ba53491b4e745'
+    sha256 = '651a768cd51627f58aa6de7039aba9ddab22f4b0450521169800555269447840'
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
