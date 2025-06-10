@@ -250,9 +250,10 @@ http_archive(
 ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61" # 11/01/2024
 http_archive(
     name = "com_google_zetasql",
+    patch_args = ["-p1"],
+    patches = ["//ml_metadata/third_party:zetasql.patch"],
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
-    #patches = ["//ml_metadata/third_party:zetasql.patch"],
     sha256 = '8db98b93bd6bb7348ed6d374f8eb6b602f7012bd5d368b3ffdee0a56c6c8d85f'
 )
 
