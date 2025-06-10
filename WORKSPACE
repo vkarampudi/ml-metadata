@@ -43,9 +43,9 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "com_google_absl",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/940c06c25d2953f44310b68eb8aab6114dba11fb.zip"],
-    strip_prefix = "abseil-cpp-940c06c25d2953f44310b68eb8aab6114dba11fb",
-    sha256 = "0e800799aa64d0b4d354f3ff317bbd5fbf42f3a522ab0456bb749fc8d3b67415",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/4447c7562e3bc702ade25105912dce503f0c4010.zip"],
+    strip_prefix = "abseil-cpp-4447c7562e3bc702ade25105912dce503f0c4010",
+    sha256 = "df8b3e0da03567badd9440377810c39a38ab3346fa89df077bb52e68e4d61e74",
 )
 
 http_archive(
@@ -108,9 +108,9 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810",
-    strip_prefix = "protobuf-3.21.9",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.21.9.tar.gz"],
+    sha256 = "ff6e9c3db65f985461d200c96c771328b6186ee0b10bc7cb2bbc87cf02ebd864",
+    strip_prefix = "protobuf-4.25.6",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v4.25.6.tar.gz"],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
@@ -201,21 +201,25 @@ http_archive(
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.3/rules_go-v0.20.3.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.3/rules_go-v0.20.3.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.48.1/rules_go-v0.48.1.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.48.1/rules_go-v0.48.1.tar.gz",
     ],
-    sha256 = "e88471aea3a3a4f19ec1310a55ba94772d087e9ce46e41ae38ecebe17935de7b",
+    sha256 = "b2038e2de2cace18f032249cb4bb0048abf583a36369fa98f687af1b3f880b26",
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "1.21.11")
 
 http_archive(
     name = "bazel_gazelle",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
     ],
-    sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
+    sha256 = "75df288c4b31c81eb50f51e2e14f4763cb7548daae126817247064637fd9ea62",
 )
 
 load("@bazel_gazelle//:deps.bzl", "go_repository", "gazelle_dependencies")
@@ -247,13 +251,13 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
+ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61" # 11/01/2024
 http_archive(
     name = "com_google_zetasql",
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
     #patches = ["//ml_metadata/third_party:zetasql.patch"],
-    sha256 = '9cfa1569863282ccbac150644f36ee4f12f9649caa7556ce340ba53491b4e745'
+    sha256 = '1afc2210d4aad371eff0a6bfdd8417ba99e02183a35dff167af2fa6097643f26'
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
@@ -282,4 +286,4 @@ ml_metadata_workspace()
 
 # Specify the minimum required bazel version.
 load("@bazel_skylib//lib:versions.bzl", "versions")
-versions.check("6.1.0")
+versions.check("6.5.0")
