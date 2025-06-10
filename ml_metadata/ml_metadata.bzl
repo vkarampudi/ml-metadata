@@ -17,7 +17,8 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 
 def ml_metadata_cc_test(
         name,
@@ -99,6 +100,43 @@ def ml_metadata_proto_library_py(
         testonly = testonly,
         use_grpc_plugin = use_grpc_plugin,
     )
+
+def _tf_proto_library(name, deps = [], visibility = None, cplusplus = False, python = False, allow_oversize_protos = False):
+    # ... existing logic ...
+
+    proto_library(
+        name = name + "_proto",
+        srcs = native.glob(["**/*.proto"]), # Or more specific globs
+        deps = deps,
+        strip_import_prefix = native.package_name(),
+        # Other proto_library attributes as needed
+    )
+
+    if cplusplus:
+        # You'll need to create a cc_library that depends on the proto_library's C++ outputs.
+        # The exact method depends on the rules_proto version and how your proto setup is configured.
+        # This is a common pattern:
+        native.cc_library(
+            name = name + "_cc_proto",
+            # The srcs and hdrs would be derived from the proto_library's C++ outputs.
+            # This often involves using a glob or specific generated files from the proto_library.
+            # You might need to add a `proto_compiler` rule or similar if your setup uses it.
+            # Look at other TensorFlow or ML-Metadata projects' BUILD files that successfully build C++ protos.
+            # Example of what it might look like (highly dependent on your exact rules_proto setup):
+            srcs = [
+                # Generated sources like name.pb.cc
+                "gen/" + name + ".pb.cc",
+            ],
+            hdrs = [
+                # Generated headers like name.pb.h
+                "gen/" + name + ".pb.h",
+            ],
+            deps = deps + [
+                "@com_google_protobuf//:protobuf_lite", # Or just "@com_google_protobuf//:protobuf"
+                ":%s_proto" % name # Depending on how rules_proto exposes its outputs
+            ],
+            linkstatic = 1,
+        )
 
 def ml_metadata_proto_library_go(
         name,
