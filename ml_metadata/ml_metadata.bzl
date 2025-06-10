@@ -17,8 +17,7 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
-
+load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
 
 def ml_metadata_cc_test(
         name,
@@ -76,46 +75,6 @@ def ml_metadata_proto_library(
         testonly = testonly,
         visibility = visibility,
     )
-
-def ml_metadata_proto_lib(name, srcs, deps = None):
-    """ml_metadata proto library.
-
-    Args:
-      name: The name of the proto library.
-      srcs: The source .proto files
-      deps: The dependencies of the proto library.
-    """
-
-    if not deps:
-      deps = []
-
-    # Define the proto_library
-    native.proto_library(
-        name = name + "_proto",
-        srcs = srcs,
-        deps = deps,
-    )
-
-    # cc_proto_library (C++)
-    native.cc_proto_library(
-        name = name + "_cc_proto",
-        deps = [":" + name + "_proto"],
-    )
-
-    # py_proto_library (Python)
-    py_proto_library(
-        name = name + "_py_pb2",
-        deps = [":" + name + "_proto"],
-    )
-
-    # Create a filegroup to export the proto and the generated files.
-    native.filegroup(
-        name = name,
-        srcs = [
-            ":" + name + "_proto",
-            ":" + name + "_cc_proto",
-            ":" + name + "_py_pb2",
-        ],
 
 def ml_metadata_proto_library_py(
         name,
