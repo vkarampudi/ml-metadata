@@ -22,34 +22,46 @@ function _is_macos() {
 }
 
 function mlmd::move_generated_files() {
-  set -eux
+  #!/bin/bash
+set -euxo pipefail
 
-  # Newer bazel does not create bazel-genfiles any more (see
-  # https://github.com/bazelbuild/bazel/issues/6761). It's merged with
-  # bazel-bin after Bazel 0.25.0. Latest bazel doesn't provide bazel-genfiles
-  # symlink anymore, so if the symlink directory doesnt' exist, use bazel-bin.
-  local bazel_genfiles
-  if [[ -d "${BUILD_WORKSPACE_DIRECTORY}/bazel-genfiles" ]]; then
-    bazel_genfiles="bazel-genfiles"
-  else
-    bazel_genfiles="bazel-bin"
-  fi
+# Get the bazel-bin directory
+bazel_bin=$(bazel info bazel-bin)
 
-  cp -f ${BUILD_WORKSPACE_DIRECTORY}/${bazel_genfiles}/ml_metadata/proto/metadata_store_pb2.py \
-    ${BUILD_WORKSPACE_DIRECTORY}/ml_metadata/proto
-  cp -f ${BUILD_WORKSPACE_DIRECTORY}/${bazel_genfiles}/ml_metadata/proto/metadata_store_service_pb2.py \
-    ${BUILD_WORKSPACE_DIRECTORY}/ml_metadata/proto
-  cp -f ${BUILD_WORKSPACE_DIRECTORY}/${bazel_genfiles}/ml_metadata/proto/metadata_store_service_pb2_grpc.py \
-    ${BUILD_WORKSPACE_DIRECTORY}/ml_metadata/proto
-  cp -f ${BUILD_WORKSPACE_DIRECTORY}/${bazel_genfiles}/ml_metadata/simple_types/proto/simple_types_pb2.py \
-    ${BUILD_WORKSPACE_DIRECTORY}/ml_metadata/simple_types/proto
+# Define the list of proto files to copy
+declare -a proto_files=(
+    "ml_metadata/proto/metadata_store_pb2.py"
+    "ml_metadata/proto/metadata_store_service_pb2.py"
+    "ml_metadata/proto/metadata_store_service_pb2_grpc.py"
+    "ml_metadata/simple_types/proto/simple_types_pb2.py"
+)
 
+# Loop through each proto file and copy it
+for proto_file in "${proto_files[@]}"; do
+    source_file="${bazel_bin}/${proto_file}"
+    dest_dir="${BUILD_WORKSPACE_DIRECTORY}/$(dirname "${proto_file}")"
 
-  MLMD_EXTENSION="ml_metadata/metadata_store/pywrap/metadata_store_extension.so"
-  cp -f ${BUILD_WORKSPACE_DIRECTORY}/bazel-bin/${MLMD_EXTENSION} \
-      ${BUILD_WORKSPACE_DIRECTORY}/${MLMD_EXTENSION}
+    if [[ ! -f "${source_file}" ]]; then
+        echo "Error: Source file not found: ${source_file}"
+        echo "Check that the py_proto_library rules are correctly defined."
+        exit 1
+    fi
 
-  chmod +w "${BUILD_WORKSPACE_DIRECTORY}/${MLMD_EXTENSION}"
-}
+    mkdir -p "${dest_dir}"
+    cp -f "${source_file}" "${dest_dir}"
+done
 
-mlmd::move_generated_files
+# Copy the metadata store extension
+MLMD_EXTENSION="ml_metadata/metadata_store/pywrap/metadata_store_extension.so"
+source_extension="${bazel_bin}/${MLMD_EXTENSION}"
+dest_extension="${BUILD_WORKSPACE_DIRECTORY}/${MLMD_EXTENSION}"
+
+if [[ ! -f "${source_extension}" ]]; then
+    echo "Error: Source extension not found: ${source_extension}"
+    exit 1
+fi
+
+cp -f "${source_extension}" "${dest_extension}"
+chmod +w "${dest_extension}"
+
+echo "Generated files moved successfully."
