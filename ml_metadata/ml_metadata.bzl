@@ -61,21 +61,6 @@ def ml_metadata_proto_library(
         testonly = testonly,
     )
 
-    use_grpc_plugin = None
-    if cc_grpc_version:
-        use_grpc_plugin = True
-    cc_proto_library(
-        name = name,
-        srcs = srcs,
-        deps = deps,
-        cc_libs = ["@com_google_protobuf//:protobuf"],
-        protoc = "@com_google_protobuf//:protoc",
-        default_runtime = "@com_google_protobuf//:protobuf",
-        use_grpc_plugin = use_grpc_plugin,
-        testonly = testonly,
-        visibility = visibility,
-    )
-
 def ml_metadata_proto_library_py(
         name,
         proto_library = None,
