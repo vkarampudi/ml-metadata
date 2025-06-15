@@ -1,3 +1,4 @@
+
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
 
 def ml_metadata_cc_test(
         name,
@@ -59,6 +60,21 @@ def ml_metadata_proto_library(
         name = name + "_proto_srcs",
         srcs = srcs,
         testonly = testonly,
+    )
+
+    use_grpc_plugin = None
+    if cc_grpc_version:
+        use_grpc_plugin = True
+    cc_proto_library(
+        name = name,
+        srcs = srcs,
+        deps = deps,
+        cc_libs = ["@com_google_protobuf//:protobuf"],
+        protoc = "@com_google_protobuf//:protoc",
+        default_runtime = "@com_google_protobuf//:protobuf",
+        use_grpc_plugin = use_grpc_plugin,
+        testonly = testonly,
+        visibility = visibility,
     )
 
 def ml_metadata_proto_library_py(
