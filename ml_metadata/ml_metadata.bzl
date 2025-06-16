@@ -1,4 +1,3 @@
-
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +15,10 @@
 This module contains build rules for ml_metadata in OSS.
 """
 
-load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@bazel_tools//tools/build_defs:proto/proto_library.bzl", "proto_library")
-load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 
 def ml_metadata_cc_test(
         name,
@@ -48,49 +46,23 @@ def ml_metadata_cc_test(
         }),
     )
 
-def ml_metadata_proto_library(
-        name,
-        srcs = [],
-        has_services = False,
-        deps = [],
-        visibility = None,
-        testonly = 0,
-        cc_grpc_version = None):
-    """Opensource cc_proto_library."""
-    _ignore = [has_services]
-    native.filegroup(
-        name = name + "_proto_srcs",
-        srcs = srcs,
-        testonly = testonly,
-    )
-    proto_library(
-        name = name + "_proto",
-        srcs = srcs,
-        deps = deps + [
-            # For well-known proto types.
-            "@com_google_protobuf//:any_proto",
-            "@com_google_protobuf//:api_proto",
-            "@com_google_protobuf//:descriptor_proto",
-        ],
-        testonly = testonly,
-        visibility = visibility,
-    )
-    use_grpc_plugin = None
-    if cc_grpc_version:
-        use_grpc_plugin = True
-    cc_proto_library(
-        name = name,
-        deps = [":" + name + "_proto"],
-        use_grpc_plugin = use_grpc_plugin,
-        testonly = testonly,
-        visibility = visibility,
-    )
-    py_proto_library(
-        name = name + "_py_pb2",
-        deps = [":" + name + "_proto"],
-        testonly = testonly,
-        visibility = visibility,
-    )
+def ml_metadata_proto_library(name, **kwargs):
+    """Google proto_library and cc_proto_library.
+
+    Args:
+        name: Name of the cc proto library.
+        **kwargs: Keyword arguments to pass to the proto libraries."""
+    native.proto_library(name = name + "_proto", **kwargs)  # buildifier: disable=native-proto
+    cc_proto_kwargs = {
+        "deps": [":" + name + "_proto"],
+    }
+    if "visibility" in kwargs:
+        cc_proto_kwargs["visibility"] = kwargs["visibility"]
+    if "testonly" in kwargs:
+        cc_proto_kwargs["testonly"] = kwargs["testonly"]
+    if "compatible_with" in kwargs:
+        cc_proto_kwargs["compatible_with"] = kwargs["compatible_with"]
+    cc_proto_library(name = name, **cc_proto_kwargs)
 
 def ml_metadata_proto_library_py(
         name,
@@ -108,7 +80,7 @@ def ml_metadata_proto_library_py(
         name = name,
         srcs = srcs,
         srcs_version = "PY2AND3",
-        deps = deps + oss_deps,
+        deps = ["@com_google_protobuf//:well_known_types_py_pb2"] + deps + oss_deps,
         default_runtime = "@com_google_protobuf//:protobuf_python",
         protoc = "@com_google_protobuf//:protoc",
         visibility = visibility,
@@ -128,10 +100,13 @@ def ml_metadata_proto_library_go(
     proto_library_name = deps[0][1:] + "_copy"
 
     # add a proto_library rule for bazel go rules
+    proto_library_deps = []
+    for dep in cc_proto_deps:
+        proto_library_deps.append(dep + "_copy")
     native.proto_library(
         name = proto_library_name,
         srcs = srcs,
-        deps = deps,
+        deps = proto_library_deps,
     )
 
     go_proto_library(
