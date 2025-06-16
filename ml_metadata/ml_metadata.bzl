@@ -18,7 +18,9 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
+load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
+
 
 def ml_metadata_cc_test(
         name,
@@ -61,18 +63,31 @@ def ml_metadata_proto_library(
         srcs = srcs,
         testonly = testonly,
     )
-
+    proto_library(
+        name = name + "_proto",
+        srcs = srcs,
+        deps = deps + [
+            # For well-known proto types.
+            "@com_google_protobuf//:any_proto",
+            "@com_google_protobuf//:api_proto",
+            "@com_google_protobuf//:descriptor_proto",
+        ],
+        testonly = testonly,
+        visibility = visibility,
+    )
     use_grpc_plugin = None
     if cc_grpc_version:
         use_grpc_plugin = True
     cc_proto_library(
         name = name,
-        srcs = srcs,
-        deps = deps,
-        cc_libs = ["@com_google_protobuf//:protobuf"],
-        protoc = "@com_google_protobuf//:protoc",
-        default_runtime = "@com_google_protobuf//:protobuf",
+        deps = [":" + name + "_proto"],
         use_grpc_plugin = use_grpc_plugin,
+        testonly = testonly,
+        visibility = visibility,
+    )
+    py_proto_library(
+        name = name + "_py_pb2",
+        deps = [":" + name + "_proto"],
         testonly = testonly,
         visibility = visibility,
     )
@@ -93,7 +108,7 @@ def ml_metadata_proto_library_py(
         name = name,
         srcs = srcs,
         srcs_version = "PY2AND3",
-        deps = ["@com_google_protobuf//:well_known_types_py_pb2"] + deps + oss_deps,
+        deps = deps + oss_deps,
         default_runtime = "@com_google_protobuf//:protobuf_python",
         protoc = "@com_google_protobuf//:protoc",
         visibility = visibility,
@@ -113,13 +128,10 @@ def ml_metadata_proto_library_go(
     proto_library_name = deps[0][1:] + "_copy"
 
     # add a proto_library rule for bazel go rules
-    proto_library_deps = []
-    for dep in cc_proto_deps:
-        proto_library_deps.append(dep + "_copy")
     native.proto_library(
         name = proto_library_name,
         srcs = srcs,
-        deps = proto_library_deps,
+        deps = deps,
     )
 
     go_proto_library(
