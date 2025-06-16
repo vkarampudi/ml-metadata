@@ -16,11 +16,6 @@
 This module contains build rules for ml_metadata in OSS.
 """
 
-local_repository(
-    name = "com_google_protobuf",
-    path = "external/com_google_protobuf",
-)
-
 load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
