@@ -19,7 +19,7 @@ This module contains build rules for ml_metadata in OSS.
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@bazel_tools//tools/build_defs/proto:proto_library.bzl", "proto_library")
+load("@bazel_tools//tools/build_defs:proto/proto_library.bzl", "proto_library")
 load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 
 def ml_metadata_cc_test(
