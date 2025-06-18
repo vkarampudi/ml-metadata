@@ -46,6 +46,13 @@ function setup_environment() {
   ${PIP_BIN} install --upgrade pip
   ${PIP_BIN} install --upgrade wheel
   ${PIP_BIN} install numpy
+   # Install build dependencies.
+  ${PIP_BIN} install 'absl-py>=0.9,<2.0.0' 'attrs>=20.3,<24' 'grpcio>=1.8.6,<2' 'six>=1.10,<2'
+  if [[ "${PYTHON_VERSION}" == 311 ]]; then
+    ${PIP_BIN} install 'protobuf>=4.25.2,<5'
+  else
+    ${PIP_BIN} install 'protobuf>=4.21.6,<5'
+  fi
   # Auditwheel does not have a python2 version and auditwheel is just a binary.
   ${PIP_BIN} install auditwheel
   sudo ln -s ${PYTHON_BIN_PATH} /usr/bin/python3
