@@ -26,7 +26,7 @@ http_archive(
 # The following is needed to use tfx_bsl with bazel version > 4.0.
 # For more information, see: https://github.com/bazelbuild/rules_cc/issues/12
 # TODO(b/262391211): Remove this once tfx_bsl supports bazel > 4.0.
-load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
+load("@rules_cc//cc:repositories.bzl", "rules_cc_toolchains")
 
 rules_cc_toolchains()
 
@@ -49,13 +49,6 @@ http_archive(
         "https://github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz",
     ],
     sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
-)
-
-http_archive(
-name = "rules_cc",
-urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.1.2/rules_cc-0.1.2.tar.gz"],
-sha256 = "d62624b45e0912713dcd3b8e30ba6ae55418ed6bf99e6d135cd61b8addae312b",
-strip_prefix = "rules_cc-0.1.2",
 )
 
 http_archive(
