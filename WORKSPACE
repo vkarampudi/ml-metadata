@@ -108,9 +108,9 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810",
-    strip_prefix = "protobuf-3.21.9",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.21.9.tar.gz"],
+    sha256 = "ff6e9c3db65f985461d200c96c771328b6186ee0b10bc7cb2bbc87cf02ebd864",
+    strip_prefix = "protobuf-4.25.6",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v4.25.6.tar.gz"],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
@@ -247,24 +247,30 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
+ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61"  # 11/01/2024
+
 http_archive(
     name = "com_google_zetasql",
-    urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
+    patch_args = ["-p1"],
+    patches = ["//third_party:zetasql.patch"],
+    sha256 = "1afc2210d4aad371eff0a6bfdd8417ba99e02183a35dff167af2fa6097643f26",
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
-    #patches = ["//ml_metadata/third_party:zetasql.patch"],
-    sha256 = '651a768cd51627f58aa6de7039aba9ddab22f4b0450521169800555269447840'
+    urls = ["https://github.com/google/zetasql/archive/%s.tar.gz" % ZETASQL_COMMIT],
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
+
 zetasql_deps_step_1()
+
 load("@com_google_zetasql//bazel:zetasql_deps_step_2.bzl", "zetasql_deps_step_2")
+
 zetasql_deps_step_2(
     analyzer_deps = True,
     evaluator_deps = True,
-    tools_deps = False,
     java_deps = False,
-    testing_deps = False)
+    testing_deps = False,
+    tools_deps = False,
+)
 
 # This is part of what zetasql_deps_step_3() does.
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
@@ -282,4 +288,4 @@ ml_metadata_workspace()
 
 # Specify the minimum required bazel version.
 load("@bazel_skylib//lib:versions.bzl", "versions")
-versions.check("6.1.0")
+versions.check("6.5.0")
