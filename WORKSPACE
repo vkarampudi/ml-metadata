@@ -108,7 +108,7 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "ff6e9c3db65f985461d200c96c771328b6186ee0b10bc7cb2bbc87cf02ebd864",
+    sha256 = "4e6727bc5d23177edefa3ad86fd2f5a92cd324151636212fd1f7f13aef3fd2b7",
     strip_prefix = "protobuf-4.25.6",
     urls = ["https://github.com/protocolbuffers/protobuf/archive/v4.25.6.tar.gz"],
 )
