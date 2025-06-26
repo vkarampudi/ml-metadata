@@ -1,7 +1,34 @@
 workspace(name = "ml_metadata")
 
-load("//ml_metadata:repo.bzl", "clean_dep")
+load("//ml_metadata:repo.bzl", "clean_dep", "mlmd_repositories")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+mlmd_repositories()
+
+
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "rules_cc",
+    sha256 = "d9f4686206d20d7c5513a39933aa1148d21d6ce16134ae4c4567c40bbac359bd",
+    strip_prefix = "rules_cc-0.0.1",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/refs/tags/0.0.1.zip"],
+)
+
+
+# The following is needed to use tfx_bsl with bazel version > 4.0.
+# For more information, see: https://github.com/bazelbuild/rules_cc/issues/12
+# TODO(b/262391211): Remove this once tfx_bsl supports bazel > 4.0.
+load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
+
+rules_cc_dependencies()
 
 http_archive(
     name = "postgresql",
@@ -24,6 +51,32 @@ http_archive(
     sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
 )
 
+http_archive(
+name = "rules_cc",
+urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.1.2/rules_cc-0.1.2.tar.gz"],
+sha256 = "d62624b45e0912713dcd3b8e30ba6ae55418ed6bf99e6d135cd61b8addae312b",
+strip_prefix = "rules_cc-0.1.2",
+)
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "6fb6767d1bef535310547e03247f7518b03487740c11b6c6adb7952033fe1295",
+    strip_prefix = "rules_proto-6.0.2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.2/rules_proto-6.0.2.tar.gz",
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+
+rules_proto_dependencies()
+
+load("@rules_proto//proto:setup.bzl", "rules_proto_setup")
+
+rules_proto_setup()
+
+load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
+
+rules_proto_toolchains()
+
 # Install version 0.9.0 of rules_foreign_cc, as default version causes an
 # invalid escape sequence error to be raised, which can't be avoided with
 # the --incompatible_restrict_string_escapes=false flag (flag was removed in
@@ -43,9 +96,9 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "com_google_absl",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/940c06c25d2953f44310b68eb8aab6114dba11fb.zip"],
-    strip_prefix = "abseil-cpp-940c06c25d2953f44310b68eb8aab6114dba11fb",
-    sha256 = "0e800799aa64d0b4d354f3ff317bbd5fbf42f3a522ab0456bb749fc8d3b67415",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/4447c7562e3bc702ade25105912dce503f0c4010.zip"],
+    strip_prefix = "abseil-cpp-4447c7562e3bc702ade25105912dce503f0c4010",
+    sha256 = "df8b3e0da03567badd9440377810c39a38ab3346fa89df077bb52e68e4d61e74",
 )
 
 http_archive(
@@ -201,21 +254,21 @@ http_archive(
 http_archive(
     name = "io_bazel_rules_go",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.3/rules_go-v0.20.3.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.3/rules_go-v0.20.3.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.48.1/rules_go-v0.48.1.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.48.1/rules_go-v0.48.1.tar.gz",
     ],
-    sha256 = "e88471aea3a3a4f19ec1310a55ba94772d087e9ce46e41ae38ecebe17935de7b",
+    sha256 = "b2038e2de2cace18f032249cb4bb0048abf583a36369fa98f687af1b3f880b26",
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 http_archive(
     name = "bazel_gazelle",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz",
     ],
-    sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
+    sha256 = "75df288c4b31c81eb50f51e2e14f4763cb7548daae126817247064637fd9ea62",
 )
 
 load("@bazel_gazelle//:deps.bzl", "go_repository", "gazelle_dependencies")
@@ -247,30 +300,25 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61"  # 11/01/2024
-
+ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61" # 11/01/2024
 http_archive(
     name = "com_google_zetasql",
     patch_args = ["-p1"],
-    patches = ["//third_party:zetasql.patch"],
-    sha256 = "1afc2210d4aad371eff0a6bfdd8417ba99e02183a35dff167af2fa6097643f26",
+    patches = ["//ml_metadata/third_party:zetasql.patch"],
+    urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
-    urls = ["https://github.com/google/zetasql/archive/%s.tar.gz" % ZETASQL_COMMIT],
+    sha256 = '8db98b93bd6bb7348ed6d374f8eb6b602f7012bd5d368b3ffdee0a56c6c8d85f'
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
-
 zetasql_deps_step_1()
-
 load("@com_google_zetasql//bazel:zetasql_deps_step_2.bzl", "zetasql_deps_step_2")
-
 zetasql_deps_step_2(
     analyzer_deps = True,
     evaluator_deps = True,
-    java_deps = False,
-    testing_deps = False,
     tools_deps = False,
-)
+    java_deps = False,
+    testing_deps = False)
 
 # This is part of what zetasql_deps_step_3() does.
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
