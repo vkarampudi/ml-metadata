@@ -28,7 +28,7 @@ http_archive(
 # TODO(b/262391211): Remove this once tfx_bsl supports bazel > 4.0.
 load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
 
-rules_cc_dependencies()
+rules_cc_toolchains()
 
 http_archive(
     name = "postgresql",
