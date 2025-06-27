@@ -15,13 +15,19 @@
 # This mock protobuffer is used to unit test PROTO value storage.
 # The mock_proto cc_library provides a utility function for building the proto
 
-load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-ml_metadata_proto_library(
-    name = "mock_proto",
+proto_library(
+    name = "mock_proto_proto",
     srcs = ["mock.proto"],
+)
+
+cc_proto_library(
+    name = "mock_proto",
+    deps = [":mock_proto_proto"],
 )

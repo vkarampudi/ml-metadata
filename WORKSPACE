@@ -4,6 +4,28 @@ load("//ml_metadata:repo.bzl", "clean_dep")
 load("//ml_metadata:workspace.bzl", "ml_metadata_workspace")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "rules_python",
+    sha256 = "c68bdc4fbec25de5b5493b8819cfc877c4ea299c0dcb15c244c5a00208cde311",
+    strip_prefix = "rules_python-0.31.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.31.0/rules_python-0.31.0.tar.gz",
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
+http_archive(
+    name = "rules_cc",
+    sha256 = "d9f4686206d20d7c5513a39933aa1148d21d6ce16134ae4c4567c40bbac359bd",
+    strip_prefix = "rules_cc-0.0.1",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/refs/tags/0.0.1.zip"],
+)
+
+load("@rules_cc//cc:repositories.bzl", "rules_cc_toolchains")
+
+rules_cc_toolchains()
+
 ml_metadata_workspace()
 
 

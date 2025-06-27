@@ -12,40 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library", "ml_metadata_proto_library_go", "ml_metadata_proto_library_py")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("@rules_python//python:proto.bzl", "py_proto_library")
+load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library_go")
 
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-ml_metadata_proto_library(
+proto_library(
+    name = "metadata_store_proto_proto",
+    srcs = ["metadata_store.proto"],
+    deps = ["@com_google_protobuf//:well_known_protos"],
+)
+
+cc_proto_library(
     name = "metadata_store_proto",
-    srcs = ["metadata_store.proto"],
-    deps = ["@com_google_protobuf//:cc_wkt_protos"],
+    deps = [":metadata_store_proto_proto"],
 )
 
-ml_metadata_proto_library(
-    name = "metadata_store_service_proto",
-    srcs = ["metadata_store_service.proto"],
-    has_services = 1,
-    cc_grpc_version = 1,
-    deps = [":metadata_store_proto"],
-)
-
-ml_metadata_proto_library_py(
+py_proto_library(
     name = "metadata_store_py_pb2",
-    srcs = ["metadata_store.proto"],
-    api_version = 2,
-    proto_library = "metadata_store_proto",
+    deps = [":metadata_store_proto_proto"],
 )
 
-ml_metadata_proto_library_py(
-    name = "metadata_store_service_py_pb2",
+proto_library(
+    name = "metadata_store_service_proto_proto",
     srcs = ["metadata_store_service.proto"],
-    api_version = 2,
-    oss_deps = [":metadata_store_py_pb2"],
-    proto_library = "metadata_store_service_proto",
-    use_grpc_plugin = True,
+    deps = [":metadata_store_proto_proto"],
+)
+
+cc_proto_library(
+    name = "metadata_store_service_proto",
+    deps = [":metadata_store_service_proto_proto"],
+)
+
+py_proto_library(
+    name = "metadata_store_service_py_pb2",
+    deps = [":metadata_store_service_proto_proto"],
 )
 
 ml_metadata_proto_library_go(
@@ -65,10 +70,13 @@ ml_metadata_proto_library_go(
     deps = [":metadata_store_service_proto"],
 )
 
-ml_metadata_proto_library(
-    name = "metadata_source_proto",
+proto_library(
+    name = "metadata_source_proto_proto",
     srcs = ["metadata_source.proto"],
-    deps = [
-        "@com_google_protobuf//:cc_wkt_protos",
-    ],
+    deps = ["@com_google_protobuf//:well_known_protos"],
+)
+
+cc_proto_library(
+    name = "metadata_source_proto",
+    deps = [":metadata_source_proto_proto"],
 )

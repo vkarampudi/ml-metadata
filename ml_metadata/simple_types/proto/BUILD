@@ -11,24 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library", "ml_metadata_proto_library_py")
+
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("@rules_python//python:proto.bzl", "py_proto_library")
 
 package(default_visibility = ["//ml_metadata:__subpackages__"])
 
 licenses(["notice"])
 
-ml_metadata_proto_library(
-    name = "simple_types_proto",
+proto_library(
+    name = "simple_types_proto_proto",
     srcs = ["simple_types.proto"],
     deps = [
-        "//ml_metadata/proto:metadata_store_proto",
+        "//ml_metadata/proto:metadata_store_proto_proto",
     ],
 )
 
-ml_metadata_proto_library_py(
+cc_proto_library(
+    name = "simple_types_proto",
+    deps = [
+        ":simple_types_proto_proto",
+    ],
+)
+
+py_proto_library(
     name = "simple_types_py_pb2",
-    srcs = ["simple_types.proto"],
-    api_version = 2,
-    oss_deps = ["//ml_metadata/proto:metadata_store_py_pb2"],
-    proto_library = "simple_types_proto",
+    deps = [
+        ":simple_types_proto_proto",
+    ],
 )

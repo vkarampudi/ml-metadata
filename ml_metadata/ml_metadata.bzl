@@ -17,7 +17,9 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
+load("@rules_python//python:proto.bzl", "py_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+
 
 def ml_metadata_cc_test(
         name,
@@ -55,19 +57,20 @@ def ml_metadata_proto_library(
         cc_grpc_version = None):
     """Opensource cc_proto_library."""
     _ignore = [has_services]
-    native.filegroup(
-        name = name + "_proto_srcs",
+    native.proto_library(
+        name = name + "_proto",
         srcs = srcs,
+        deps = deps,
+        visibility = visibility,
         testonly = testonly,
     )
 
     use_grpc_plugin = None
     if cc_grpc_version:
         use_grpc_plugin = True
-    cc_proto_library(
+    native.cc_proto_library(
         name = name,
-        srcs = srcs,
-        deps = deps,
+        deps = [name + "_proto"],
         cc_libs = ["@com_google_protobuf//:protobuf"],
         protoc = "@com_google_protobuf//:protoc",
         default_runtime = "@com_google_protobuf//:protobuf",
@@ -88,7 +91,7 @@ def ml_metadata_proto_library_py(
         use_grpc_plugin = False):
     """Opensource py_proto_library."""
     _ignore = [proto_library, api_version, oss_deps]
-    py_proto_library(
+    native.py_proto_library(
         name = name,
         srcs = srcs,
         srcs_version = "PY2AND3",
