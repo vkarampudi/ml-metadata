@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library_go")
 
@@ -24,7 +24,14 @@ licenses(["notice"])
 proto_library(
     name = "metadata_store_proto_proto",
     srcs = ["metadata_store.proto"],
-    deps = ["@com_google_protobuf//:well_known_protos"],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
+    ],
 )
 
 cc_proto_library(
@@ -73,7 +80,14 @@ ml_metadata_proto_library_go(
 proto_library(
     name = "metadata_source_proto_proto",
     srcs = ["metadata_source.proto"],
-    deps = ["@com_google_protobuf//:well_known_protos"],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
+    ],
 )
 
 cc_proto_library(
