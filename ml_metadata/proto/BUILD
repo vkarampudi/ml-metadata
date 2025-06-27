@@ -15,6 +15,16 @@
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_python//python:proto.bzl", "py_proto_library")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "auto")
+
+
+
+
+
 load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library_go")
 
 package(default_visibility = ["//visibility:public"])
