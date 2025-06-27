@@ -1,9 +1,10 @@
 workspace(name = "ml_metadata")
 
 load("//ml_metadata:repo.bzl", "clean_dep")
+load("//ml_metadata:workspace.bzl", "ml_metadata_workspace")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-mlmd_repositories()
+ml_metadata_workspace()
 
 
 http_archive(
@@ -321,11 +322,6 @@ switched_rules_by_language(
 )
 
 
-
-# Please add all new ML Metadata dependencies in workspace.bzl.
-load("//ml_metadata:workspace.bzl", "ml_metadata_workspace")
-
-ml_metadata_workspace()
 
 # Specify the minimum required bazel version.
 load("@bazel_skylib//lib:versions.bzl", "versions")
