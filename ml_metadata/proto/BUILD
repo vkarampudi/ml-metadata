@@ -73,7 +73,7 @@ ml_metadata_proto_library_go(
 proto_library(
     name = "metadata_source_proto_proto",
     srcs = ["metadata_source.proto"],
-    deps = ["@com_google_protobuf//:well_known_type_protos"],
+    deps = ["@com_google_protobuf//:well_known_protos"],
 )
 
 cc_proto_library(
