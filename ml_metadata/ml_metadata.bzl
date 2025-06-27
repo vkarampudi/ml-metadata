@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,15 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-This module contains build rules for ml_metadata in OSS.
+#
+# This file is internal only. See opensource_only/ml_metadata.bzl.
+""" A bridge between internal rules and OSS bazel rules.
+
+It includes mappings between proto API and Google internal proto library:
+- proto_library
+- py_proto_library
+- go_proto_library
+
+It also includes bazel rules-go and Google internal Go rules:
+- go_library
+- go_test
+- go_wrap_cc
+
+For example use, see ml_metadata/metadata_store/BUILD
 """
 
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@rules_python//python:proto.bzl", "py_proto_library")
-load("@rules_cc//cc:defs.bzl", "cc_proto_library")
-
+load("//third_party/bazel_rules/rules_python/python:proto.bzl", "py_proto_library")
+load("//third_party/bazel_rules/rules_python/python:py_extension.bzl", "py_extension")
+load("//third_party/protobuf/bazel:proto_library.bzl", "proto_library")
+load("//tools/build_defs/go:go_library.bzl", "go_library")
+load("//tools/build_defs/go:go_proto_library.bzl", "go_proto_library")
+load("//tools/build_defs/go:go_test.bzl", "go_test")
+load("//tools/build_defs/go:go_wrap_cc.bzl", "go_wrap_cc")
+load("//tools/build_defs/proto/cpp:cc_grpc_library.bzl", "cc_grpc_library")
+load("//tools/build_defs/proto/cpp:cc_proto_library.bzl", "cc_proto_library")
+load("//tools/build_defs/proto/cpp:proto_names_to_cc_proto_names.bzl", "cc_proto_library_name_from_proto_name")
 
 def ml_metadata_cc_test(
         name,
@@ -29,59 +47,73 @@ def ml_metadata_cc_test(
         tags = [],
         args = [],
         size = None,
-        data = None):
-    _ignore = [data]
+        data = []):
     native.cc_test(
         name = name,
         srcs = srcs,
-        deps = deps,
         env = env,
+        deps = deps,
         tags = tags,
         args = args,
         size = size,
-        # cc_tests with ".so"s in srcs incorrectly link on Darwin unless
-        # linkstatic=1 (https://github.com/bazelbuild/bazel/issues/3450).
-        linkstatic = select({
-            "//ml_metadata/metadata_store:darwin": 1,
-            "//conditions:default": 0,
-        }),
+        data = data,
     )
 
-def ml_metadata_proto_library(
+def ml_metadata_proto_library(name, **kwargs):
+    """Google proto_library and cc_proto_library.
+
+    Args:
+        name = name,
+        **kwargs: Keyword arguments to pass to the proto libraries."""
+    well_known_protos = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:wrappers_proto",
+    ]
+    kwargs["deps"] = kwargs.get("deps", []) + well_known_protos
+    proto_library(name = name, **kwargs)  # buildifier: disable=native-proto
+    cc_proto_kwargs = {
+        "deps": [":" + name],
+    }
+    if "visibility" in kwargs:
+        cc_proto_kwargs["visibility"] = kwargs["visibility"]
+    if "testonly" in kwargs:
+        cc_proto_kwargs["testonly"] = kwargs["testonly"]
+    if "compatible_with" in kwargs:
+        cc_proto_kwargs["compatible_with"] = kwargs["compatible_with"]
+    cc_proto_library(name = name + "_cc_pb2", **cc_proto_kwargs)
+
+
+def ml_metadata_proto_library_with_grpc(
         name,
         srcs = [],
         has_services = False,
         deps = [],
         visibility = None,
-        testonly = 0,
-        cc_grpc_version = None):
-    """Opensource cc_proto_library."""
-    _ignore = [has_services]
-    native.proto_library(
-        name = name + "_proto",
+        testonly = 0):
+    ml_metadata_proto_library(
+        name = name,
         srcs = srcs,
+        has_services = has_services,
         deps = deps,
-        visibility = visibility,
         testonly = testonly,
+        visibility = visibility,
     )
 
-    use_grpc_plugin = None
-    if cc_grpc_version:
-        use_grpc_plugin = True
-    native.cc_proto_library(
-        name = name,
-        deps = [name + "_proto"],
-        cc_libs = ["@com_google_protobuf//:protobuf"],
-        protoc = "@com_google_protobuf//:protoc",
-        default_runtime = "@com_google_protobuf//:protobuf",
-        use_grpc_plugin = use_grpc_plugin,
-        testonly = testonly,
-        visibility = visibility,
-    )
+    cc_proto_name = name + "_cc_pb2"
+    if has_services:
+        cc_grpc_library(
+            name = name[:-len("_proto")] + "_cc_grpc_proto",
+            srcs = [name],
+            deps = [cc_proto_library_name_from_proto_name(name)],
+        )
 
 def ml_metadata_proto_library_py(
         name,
-        proto_library = None,
+        proto_library,
         api_version = None,
         srcs = [],
         deps = [],
@@ -89,20 +121,18 @@ def ml_metadata_proto_library_py(
         testonly = 0,
         oss_deps = [],
         use_grpc_plugin = False):
-    """Opensource py_proto_library."""
-    _ignore = [proto_library, api_version, oss_deps]
-    native.py_proto_library(
+    _ignore = [deps, srcs, oss_deps]
+    py_proto_library(
         name = name,
-        srcs = srcs,
-        srcs_version = "PY2AND3",
-        deps = ["@com_google_protobuf//:well_known_types_py_pb2"] + deps + oss_deps,
-        default_runtime = "@com_google_protobuf//:protobuf_python",
-        protoc = "@com_google_protobuf//:protoc",
+        deps = [proto_library],
         visibility = visibility,
         testonly = testonly,
-        use_grpc_plugin = use_grpc_plugin,
+        has_services = use_grpc_plugin,
     )
-
+    
+# Go toolchain rules in OSS is different from internal blaze rules. The
+# following rules simply wraps the native blaze rule, define and ignore
+# parameters used in OSS bazel rules-go.
 def ml_metadata_proto_library_go(
         name,
         deps = [],
@@ -111,25 +141,10 @@ def ml_metadata_proto_library_go(
         cc_proto_deps = [],
         go_proto_deps = [],
         gen_oss_grpc = False):
-    """Opensource go_proto_library."""
-    proto_library_name = deps[0][1:] + "_copy"
-
-    # add a proto_library rule for bazel go rules
-    proto_library_deps = []
-    for dep in cc_proto_deps:
-        proto_library_deps.append(dep + "_copy")
-    native.proto_library(
-        name = proto_library_name,
-        srcs = srcs,
-        deps = proto_library_deps,
-    )
-
+    _ignore = [srcs, importpath, cc_proto_deps, go_proto_deps, gen_oss_grpc]
     go_proto_library(
         name = name,
-        importpath = importpath,
-        proto = ":" + proto_library_name,
-        deps = go_proto_deps,
-        compilers = ["@io_bazel_rules_go//proto:go_grpc"] if gen_oss_grpc else None,
+        deps = deps,
     )
 
 def ml_metadata_go_library(
@@ -139,14 +154,11 @@ def ml_metadata_go_library(
         importpath = None,
         cgo = None,
         cdeps = None):
-    """Opensource go_library"""
+    _ignore = [importpath, cgo, cdeps]
     go_library(
         name = name,
         srcs = srcs,
-        importpath = importpath,
         deps = deps,
-        cgo = cgo,
-        cdeps = cdeps,
     )
 
 def ml_metadata_go_test(
@@ -155,140 +167,59 @@ def ml_metadata_go_test(
         size = None,
         library = None,
         deps = []):
-    """Opensource go_test"""
     go_test(
         name = name,
         size = size,
         srcs = srcs,
-        embed = [library],
+        library = library,
         deps = deps,
     )
 
-# The rule builds a static cc library with the `libname` as target name,
-# and `swigfile`_swig.cc as its srcs. In addition the rule builds a
-# go_library in -cgo mode with `name` as the target name, `name`.go as its srcs
-# and links to the `libname` with cgo dependency in `cdeps`.
-# Note: the `swigfile`_swig.cc and `name`.go is auto-generated, and should be
-#       provided when using the rule.
+# Swig go_wrap_cc is an internal only rule. OSS bazel rules-go does not support
+# swig to c++. Only -cgo mode is available.
+# Internally, `swigfile`.i is renamed to `swigfile`.swig, and used to build the
+# wrap cc and library.
 def ml_metadata_go_wrap_cc(
         name,
         swigfile = None,
         deps = [],
         libname = None,
         importpath = None):
-    native.cc_library(
-        name = libname,
-        srcs = [swigfile + "_swig.cc"],
-        linkstatic = 1,
+    _ignore = [libname, importpath]
+
+    native.genrule(
+        name = name + "_renamerule",
+        srcs = [swigfile + ".i"],
+        outs = [swigfile + ".swig"],
+        cmd = """
+      for FILE in $(SRCS); do
+        cp "$$FILE" "$(GENDIR)/$$(dirname $$FILE)/`basename $$FILE .i`.swig";
+      done;
+      """,
+    )
+    go_wrap_cc(
+        name = name,
+        srcs = [swigfile + ".swig"],
         deps = deps,
     )
 
-    ml_metadata_go_library(
-        name = name,
-        srcs = [name + ".go"],
-        importpath = importpath,
-        cgo = True,
-        cdeps = [libname],
-    )
-
-# The rule builds a pybind11 extension.
+# Pybind11 py_extension is an internal only rule.
 def ml_metadata_pybind_extension(
         name,
         srcs,
         module_name,
         deps = [],
         visibility = None):
-    """Builds a pybind1 py_extension module.
-
-    Args:
-      name: Name of the target.
-      srcs: C++ source files.
-      module_name: Ignored.
-      deps: Dependencies.
-      visibility: Visibility.
-    """
-    _ignore = [module_name]
-    p = name.rfind("/")
-    if p == -1:
-        sname = name
-        prefix = ""
-    else:
-        sname = name[p + 1:]
-        prefix = name[:p + 1]
-    so_file = "%s%s.so" % (prefix, sname)
-    pyd_file = "%s%s.pyd" % (prefix, sname)
-    exported_symbols = [
-        "init%s" % sname,
-        "init_%s" % sname,
-        "PyInit_%s" % sname,
-    ]
-
-    exported_symbols_file = "%s-exported-symbols.lds" % name
-    version_script_file = "%s-version-script.lds" % name
-
-    exported_symbols_output = "\n".join(["_%s" % symbol for symbol in exported_symbols])
-    version_script_output = "\n".join([" %s;" % symbol for symbol in exported_symbols])
-
-    native.genrule(
-        name = name + "_exported_symbols",
-        outs = [exported_symbols_file],
-        cmd = "echo '%s' >$@" % exported_symbols_output,
-        output_licenses = ["unencumbered"],
-        visibility = ["//visibility:private"],
-    )
-
-    native.genrule(
-        name = name + "_version_script",
-        outs = [version_script_file],
-        cmd = "echo '{global:\n%s\n local: *;};' >$@" % version_script_output,
-        output_licenses = ["unencumbered"],
-        visibility = ["//visibility:private"],
-    )
-
-    native.cc_binary(
-        name = so_file,
+    py_extension(
+        name = name,
+        module_name = module_name,
         srcs = srcs,
+        srcs_version = "PY3ONLY",
         copts = [
             "-fno-strict-aliasing",
             "-fexceptions",
-        ] + select({
-            "//conditions:default": [
-                "-fvisibility=hidden",
-            ],
-        }),
-        linkopts = select({
-            "//ml_metadata:macos": [
-                # TODO: the -w suppresses a wall of harmless warnings about hidden typeinfo symbols
-                # not being exported.  There should be a better way to deal with this.
-                "-Wl,-w",
-                "-Wl,-exported_symbols_list,$(location %s)" % exported_symbols_file,
-            ],
-            "//conditions:default": [
-                "-Wl,--version-script",
-                "$(location %s)" % version_script_file,
-            ],
-        }),
-        deps = deps + [
-            exported_symbols_file,
-            version_script_file,
         ],
         features = ["-use_header_modules"],
-        linkshared = 1,
-        visibility = visibility,
-    )
-    native.genrule(
-        name = name + "_pyd_copy",
-        srcs = [so_file],
-        outs = [pyd_file],
-        cmd = "cp $< $@",
-        output_to_bindir = True,
-        visibility = visibility,
-    )
-    native.py_library(
-        name = name,
-        data = select({
-            "//conditions:default": [so_file],
-        }),
-        srcs_version = "PY3",
+        deps = deps,
         visibility = visibility,
     )
