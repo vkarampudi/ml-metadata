@@ -19,7 +19,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 
 def ml_metadata_cc_test(
@@ -90,15 +90,13 @@ def ml_metadata_proto_library_py(
         name,
         deps,
         visibility = None,
-        testonly = 0,
-        use_grpc_plugin = False):
+        testonly = 0):
     """Opensource py_proto_library."""
     py_proto_library(
         name = name,
         deps = deps,
         visibility = visibility,
         testonly = testonly,
-        use_grpc_plugin = use_grpc_plugin,
     )
 
 def ml_metadata_proto_library_go(

@@ -12,11 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library_py")
 
 package(default_visibility = ["//ml_metadata:__subpackages__"])
 
 licenses(["notice"])
+
+proto_library(
+    name = "metadata_store_proto",
+    srcs = ["//ml_metadata/proto:metadata_store.proto"],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:descriptor_proto",
+    ],
+)
+
+filegroup(
+    name = "simple_types_proto_srcs",
+    srcs = ["simple_types.proto"],
+)
 
 proto_library(
     name = "simple_types_proto",
@@ -26,7 +41,7 @@ proto_library(
     ],
 )
 
-py_proto_library(
+ml_metadata_proto_library_py(
     name = "simple_types_py_pb2",
     deps = [":simple_types_proto"],
 )
