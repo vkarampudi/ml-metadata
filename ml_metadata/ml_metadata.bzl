@@ -88,23 +88,14 @@ def ml_metadata_proto_library(
 
 def ml_metadata_proto_library_py(
         name,
-        proto_library = None,
-        api_version = None,
-        srcs = [],
-        deps = [],
+        deps,
         visibility = None,
         testonly = 0,
-        oss_deps = [],
         use_grpc_plugin = False):
     """Opensource py_proto_library."""
-    _ignore = [proto_library, api_version, oss_deps]
     py_proto_library(
         name = name,
-        srcs = srcs,
-        srcs_version = "PY2AND3",
-        deps = ["@com_google_protobuf//:well_known_types_py_pb2"] + deps + oss_deps,
-        default_runtime = "@com_google_protobuf//:protobuf_python",
-        protoc = "@com_google_protobuf//:protoc",
+        deps = deps,
         visibility = visibility,
         testonly = testonly,
         use_grpc_plugin = use_grpc_plugin,
