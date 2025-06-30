@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library", "ml_metadata_proto_library_py")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 
 package(default_visibility = ["//ml_metadata:__subpackages__"])
 
@@ -25,7 +26,7 @@ proto_library(
     ],
 )
 
-ml_metadata_proto_library_py(
+py_proto_library(
     name = "simple_types_py_pb2",
     deps = [":simple_types_proto"],
 )

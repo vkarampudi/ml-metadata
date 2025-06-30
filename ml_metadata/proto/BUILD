@@ -2,6 +2,7 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
+# You may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
@@ -12,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library", "ml_metadata_proto_library_go", "ml_metadata_proto_library_py")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("//ml_metadata:ml_metadata.bzl", "ml_metadata_proto_library_go")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +24,11 @@ licenses(["notice"])
 proto_library(
     name = "metadata_store_proto",
     srcs = ["metadata_store.proto"],
-    deps = ["@com_google_protobuf//:cc_wkt_protos"],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:descriptor_proto",
+    ],
 )
 
 proto_library(
@@ -30,18 +37,17 @@ proto_library(
     deps = [":metadata_store_proto"],
 )
 
-ml_metadata_proto_library_py(
+py_proto_library(
     name = "metadata_store_py_pb2",
     deps = [":metadata_store_proto"],
 )
 
-ml_metadata_proto_library_py(
+py_proto_library(
     name = "metadata_store_service_py_pb2",
     deps = [
         ":metadata_store_service_proto",
         ":metadata_store_py_pb2",
     ],
-    use_grpc_plugin = True,
 )
 
 ml_metadata_proto_library_go(
@@ -61,10 +67,10 @@ ml_metadata_proto_library_go(
     deps = [":metadata_store_service_proto"],
 )
 
-ml_metadata_proto_library(
+proto_library(
     name = "metadata_source_proto",
     srcs = ["metadata_source.proto"],
     deps = [
-        "@com_google_protobuf//:cc_wkt_protos",
+        "@com_google_protobuf//:well_known_type_protos",
     ],
 )
