@@ -49,6 +49,25 @@ http_archive(
 )
 
 http_archive(
+    name = "rules_proto",
+    sha256 = "6fb6767d1bef535310547e03247f7518b03487740c11b6c6adb7952033fe1295",
+    strip_prefix = "rules_proto-6.0.2",
+    url = "https://github.com/bazelbuild/rules_proto/releases/download/6.0.2/rules_proto-6.0.2.tar.gz",
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+
+rules_proto_dependencies()
+
+load("@rules_proto//proto:setup.bzl", "rules_proto_setup")
+
+rules_proto_setup()
+
+load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
+
+rules_proto_toolchains()
+
+http_archive(
     name = "boringssl",
     sha256 = "1188e29000013ed6517168600fc35a010d58c5d321846d6a6dfee74e4c788b45",
     strip_prefix = "boringssl-7f634429a04abc48e2eb041c81c5235816c96514",
@@ -108,9 +127,9 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810",
-    strip_prefix = "protobuf-3.21.9",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.21.9.tar.gz"],
+    sha256 = "4e6727bc5d23177edefa3ad86fd2f5a92cd324151636212fd1f7f13aef3fd2b7",
+    strip_prefix = "protobuf-4.25.6",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v4.25.6.tar.gz"],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
@@ -247,13 +266,14 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
+ZETASQL_COMMIT = "a516c6b26d183efc4f56293256bba92e243b7a61" # 11/01/2024
 http_archive(
     name = "com_google_zetasql",
+    patch_args = ["-p1"],
+    patches = ["//ml_metadata/third_party:zetasql.patch"],
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
-    #patches = ["//ml_metadata/third_party:zetasql.patch"],
-    sha256 = '651a768cd51627f58aa6de7039aba9ddab22f4b0450521169800555269447840'
+    sha256 = '8db98b93bd6bb7348ed6d374f8eb6b602f7012bd5d368b3ffdee0a56c6c8d85f'
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
@@ -282,4 +302,4 @@ ml_metadata_workspace()
 
 # Specify the minimum required bazel version.
 load("@bazel_skylib//lib:versions.bzl", "versions")
-versions.check("6.1.0")
+versions.check("6.5.0")
