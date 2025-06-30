@@ -17,7 +17,10 @@ This module contains build rules for ml_metadata in OSS.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 
 def ml_metadata_cc_test(
         name,
@@ -54,27 +57,34 @@ def ml_metadata_proto_library(
         testonly = 0,
         cc_grpc_version = None):
     """Opensource cc_proto_library."""
-    _ignore = [has_services]
+    _ignore = [cc_grpc_version]
     native.filegroup(
         name = name + "_proto_srcs",
         srcs = srcs,
         testonly = testonly,
     )
 
-    use_grpc_plugin = None
-    if cc_grpc_version:
-        use_grpc_plugin = True
-    cc_proto_library(
-        name = name,
+    proto_library(
+        name = name + "_proto",
         srcs = srcs,
         deps = deps,
-        cc_libs = ["@com_google_protobuf//:protobuf"],
-        protoc = "@com_google_protobuf//:protoc",
-        default_runtime = "@com_google_protobuf//:protobuf",
-        use_grpc_plugin = use_grpc_plugin,
-        testonly = testonly,
-        visibility = visibility,
     )
+
+    if has_services:
+        cc_grpc_library(
+            name = name,
+            srcs = srcs,
+            deps = deps,
+            visibility = visibility,
+            testonly = testonly,
+        )
+    else:
+        cc_proto_library(
+            name = name,
+            deps = [":" + name + "_proto"],
+            visibility = visibility,
+            testonly = testonly,
+        )
 
 def ml_metadata_proto_library_py(
         name,
