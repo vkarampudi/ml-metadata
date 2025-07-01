@@ -43,9 +43,9 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "com_google_absl",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/940c06c25d2953f44310b68eb8aab6114dba11fb.zip"],
-    strip_prefix = "abseil-cpp-940c06c25d2953f44310b68eb8aab6114dba11fb",
-    sha256 = "0e800799aa64d0b4d354f3ff317bbd5fbf42f3a522ab0456bb749fc8d3b67415",
+    sha256 = "df8b3e0da03567badd9440377810c39a38ab3346fa89df077bb52e68e4d61e74",
+    strip_prefix = "abseil-cpp-4447c7562e3bc702ade25105912dce503f0c4010",
+    url = "https://github.com/abseil/abseil-cpp/archive/4447c7562e3bc702ade25105912dce503f0c4010.tar.gz",
 )
 
 http_archive(
@@ -154,21 +154,15 @@ http_archive(
 
 http_archive(
     name = "pybind11",
-    urls = [
-        "https://github.com/pybind/pybind11/archive/v2.10.1.tar.gz",
-    ],
-    strip_prefix = "pybind11-2.10.1",
-    build_file = "@pybind11_bazel//:pybind11.BUILD",
+    build_file = "//ml_metadata/third_party:pybind11.BUILD",
+    sha256 = "8f4b7f28d214e36301435c055076c36186388dc9617117802cba8a059347cb00",
+    strip_prefix = "pybind11-8a099e44b3d5f85b20f05828d919d2332a8de841",
+    urls = ["https://github.com/pybind/pybind11/archive/8a099e44b3d5f85b20f05828d919d2332a8de841.zip"],
 )
 
-load("@pybind11_bazel//:python_configure.bzl", "python_configure")
-python_configure(name = "local_config_python")
+load("//ml_metadata/third_party:python_configure.bzl", "local_python_configure")
 
-# Needed by @com_google_protobuf.
-bind(
-    name = "python_headers",
-    actual = "@local_config_python//:python_headers",
-)
+local_python_configure(name = "local_config_python")
 
 # Note - use @com_github_google_re2 instead of more canonical
 #        @com_google_re2 for consistency with dependency grpc
@@ -249,6 +243,24 @@ go_repository(
     name = "com_github_google_go_cmp",
     importpath = "github.com/google/go-cmp",
     tag = "v0.2.0",
+)
+
+go_repository(
+    name = "com_github_golang_protobuf",
+    importpath = "github.com/golang/protobuf",
+    tag = "v1.3.2",
+)
+
+go_repository(
+    name = "org_golang_google_protobuf",
+    importpath = "google.golang.org/protobuf",
+    tag = "v1.25.0",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    importpath = "golang.org/x/net",
+    commit = "b3afb19ee333d5231c1034d3ac2a5313cde533a3",
 )
 
 go_rules_dependencies()

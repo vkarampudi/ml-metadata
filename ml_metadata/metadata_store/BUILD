@@ -14,7 +14,6 @@
 
 load(
     "//ml_metadata:ml_metadata.bzl",
-    "ml_metadata_cc_test",
     "ml_metadata_go_library",
     "ml_metadata_go_test",
     "ml_metadata_go_wrap_cc",
@@ -119,7 +118,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "sqlite_rdbms_metadata_access_object_test",
     size = "small",
     srcs = ["sqlite_rdbms_metadata_access_object_test.cc"],
@@ -188,7 +187,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "sqlite_query_config_executor_test",
     srcs = [
         "sqlite_query_config_executor_test.cc",
@@ -310,7 +309,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "list_operation_query_helper_test",
     size = "small",
     srcs = ["list_operation_query_helper_test.cc"],
@@ -370,7 +369,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "metadata_source_test",
     size = "small",
     srcs = ["metadata_source_test.cc"],
@@ -395,7 +394,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "transaction_executor_test",
     srcs = ["transaction_executor_test.cc"],
     deps = [
@@ -470,7 +469,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "metadata_store_cc_test",
     srcs = ["metadata_store_test.cc"],
     env = {
@@ -547,7 +546,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "metadata_store_factory_test",
     srcs = ["metadata_store_factory_test.cc"],
     env = {
@@ -595,7 +594,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "sqlite_metadata_source_test",
     size = "small",
     srcs = ["sqlite_metadata_source_test.cc"],
@@ -635,7 +634,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "simple_types_util_test",
     srcs = ["simple_types_util_test.cc"],
     deps = [
@@ -646,7 +645,7 @@ ml_metadata_cc_test(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "test_util_test",
     srcs = ["test_util_test.cc"],
     deps = [
@@ -828,7 +827,7 @@ cc_test(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "sqlite_metadata_access_object_test",
     srcs = ["sqlite_metadata_access_object_test.cc"],
     deps = [
@@ -1034,7 +1033,7 @@ cc_library(
     deps = [":postgresql_metadata_source"],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "metadata_access_object_factory_test",
     srcs = ["metadata_access_object_factory_test.cc"],
     deps = [

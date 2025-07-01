@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(
-    "//ml_metadata:ml_metadata.bzl",
-    "ml_metadata_cc_test",
-)
+
 
 licenses(["notice"])
 
@@ -37,7 +34,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "filter_query_ast_resolver_test",
     size = "small",
     srcs = ["filter_query_ast_resolver_test.cc"],
@@ -67,7 +64,7 @@ cc_library(
     ],
 )
 
-ml_metadata_cc_test(
+cc_test(
     name = "filter_query_builder_test",
     size = "small",
     srcs = ["filter_query_builder_test.cc"],
