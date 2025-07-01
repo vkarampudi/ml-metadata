@@ -1,4 +1,4 @@
-licenses(["restricted"])Add commentMore actions
+licenses(["restricted"])
 
 package(default_visibility = ["//visibility:public"])
 
