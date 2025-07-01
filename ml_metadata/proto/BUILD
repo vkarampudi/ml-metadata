@@ -71,6 +71,11 @@ proto_library(
     name = "metadata_source_proto",
     srcs = ["metadata_source.proto"],
     deps = [
-        "@com_google_protobuf//:well_known_type_protos",
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:struct_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:wrappers_proto",
     ],
 )

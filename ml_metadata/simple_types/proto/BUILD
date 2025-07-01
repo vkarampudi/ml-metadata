@@ -19,21 +19,6 @@ package(default_visibility = ["//ml_metadata:__subpackages__"])
 licenses(["notice"])
 
 proto_library(
-    name = "metadata_store_proto",
-    srcs = ["//ml_metadata/proto:metadata_store.proto"],
-    deps = [
-        "@com_google_protobuf//:any_proto",
-        "@com_google_protobuf//:struct_proto",
-        "@com_google_protobuf//:descriptor_proto",
-    ],
-)
-
-filegroup(
-    name = "simple_types_proto_srcs",
-    srcs = ["simple_types.proto"],
-)
-
-proto_library(
     name = "simple_types_proto",
     srcs = ["simple_types.proto"],
     deps = [
